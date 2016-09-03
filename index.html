@@ -1,0 +1,93 @@
+<body>
+	<input type="text" id='nick' placeholder="NickName" value="ali">
+<table width='100%' border='1'>
+
+<tr>
+
+<td width="20%" >
+	<ul id="userlist"></ul>
+</td>
+<td >
+	<div style="height:500px;width:100%;overflow:auto" id="chatBow"></div>
+<input type="text" id="msg" size="100%" style="40px"><button onclick="send()">Send</button>
+</td>
+
+</tr>
+
+</table>
+
+<video height="300" id="localVideo"></video>
+        <div id="remotesVideos"></div>
+ 
+
+</body>
+
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="https://simplewebrtc.com/latest-v2.js"></script> 
+ <script>
+
+
+var webrtc = new SimpleWebRTC({
+  // the id/element dom element that will hold "our" video
+  localVideoEl: 'localVideo',
+  // the id/element dom element that will hold remote videos
+  remoteVideosEl: 'remotesVideos',
+  // immediately ask for camera access
+  autoRequestMedia: true
+});
+
+webrtc.on('readyToCall', function () {
+  // you can name it anything
+  webrtc.joinRoom('your awesome room name');
+});
+
+	var socket = io.connect('http://localhost:3000');
+
+	socket.on("chat", function(msg){ 
+		console.log(msg)
+		if(msg.username){
+			
+			if(!document.getElementById(msg.username)){
+
+				var user = '<li width="100%" id="'+msg.username+'">'+msg.username+'</li>'
+				
+var d1 = document.getElementById('userlist');
+d1.insertAdjacentHTML('beforeend', user);
+
+			
+			}
+			var message  = '<br/><b>'+msg.username+'</b> : '+msg.message;
+
+var d1 = document.getElementById('chatBow');
+d1.insertAdjacentHTML('beforeend', message);
+
+			
+
+
+		}
+
+ 	});
+
+function send(){
+	var msg = document.getElementById('msg').value;
+	if(msg!=""){
+		var nick = document.getElementById('nick').value;
+		var msgObj = {username:nick,message:msg}
+	socket.emit('chat',msgObj)		
+	document.getElementById('msg').value = '';
+
+	}
+}
+
+ </script>
+
+
+
+ /****
+Socket got two main function ON and EMIT
+
+
+
+ */
